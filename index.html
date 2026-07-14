@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>فحص حدود المسؤولية</title>
+
+<style>
+body{
+font-family:Arial;
+background:#f3f3f3;
+padding:20px;
+text-align:center;
+}
+
+.box{
+background:white;
+max-width:450px;
+margin:auto;
+padding:25px;
+border-radius:15px;
+}
+
+input{
+width:95%;
+padding:12px;
+font-size:16px;
+margin:10px 0;
+}
+
+button{
+padding:12px 35px;
+font-size:17px;
+border:0;
+border-radius:8px;
+cursor:pointer;
+}
+
+#result{
+margin-top:20px;
+font-size:20px;
+font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>فحص حدود المسؤولية</h2>
+
+<input id="url" placeholder="ألصق رابط Google Maps">
+
+<button onclick="check()">فحص</button>
+
+<div id="result"></div>
+
+</div>
+
+
+<script>
+
+const boundary = [
+
+[26.497905,49.485528],
+[26.438767,49.540167],
+[26.374228,49.557639],
+[26.251903,49.609417],
+[26.276033,49.741833],
+[26.096339,49.836611],
+[26.091261,49.829889],
+[26.039297,49.888444],
+[26.043025,49.898500],
+[25.956503,49.898500],
+[25.953461,50.000083],
+[25.935725,50.007194],
+[25.935733,50.053361],
+[25.969692,50.068750],
+[25.966986,50.091556],
+[25.945836,50.107444],
+[25.944228,50.116194],
+[25.819278,50.145056],
+[25.811639,50.128472],
+[25.820250,50.123611],
+[25.794114,50.064028],
+[25.885031,50.027528],
+[25.855833,49.677806],
+[25.844492,49.606500],
+[25.799867,49.582528],
+[25.748611,49.541694],
+[25.727583,49.531917],
+[25.701850,49.505417],
+[25.773261,49.442417],
+[25.734928,49.394750],
+[25.746275,49.313222],
+[25.737833,49.250167],
+[25.780694,49.216500],
+[25.824394,49.174194],
+[25.881503,49.174028],
+[25.931397,49.181500],
+[25.963789,49.167472],
+[25.952550,49.151472],
+[26.010606,49.111444],
+[26.006492,49.075556],
+[26.056367,49.023917],
+[26.256561,49.071417],
+[26.481656,48.900750],
+[26.541628,49.022778],
+[26.590736,49.122694]
+
+];
+
+
+// فحص داخل المضلع
+function inside(lat,lng){
+
+let c=false;
+
+for(let i=0,j=boundary.length-1;i<boundary.length;j=i++){
+
+let yi=boundary[i][1];
+let yj=boundary[j][1];
+
+let xi=boundary[i][0];
+let xj=boundary[j][0];
+
+let test=((yi>lng)!=(yj>lng)) &&
+(lat < (xj-xi)*(lng-yi)/(yj-yi)+xi);
+
+if(test)c=!c;
+
+}
+
+return c;
+
+}
+
+
+// استخراج الإحداثيات
+
+function getCoords(text){
+
+// رابط فيه @lat,lng
+let a=text.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+if(a)
+return [
+parseFloat(a[1]),
+parseFloat(a[2])
+];
+
+
+// رابط فيه !3d !4d
+let b=text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+
+if(b)
+return [
+parseFloat(b[1]),
+parseFloat(b[2])
+];
+
+
+// إدخال مباشر lat,lng
+let c=text.match(/(-?\d+\.\d+)[,\s]+(-?\d+\.\d+)/);
+
+if(c)
+return [
+parseFloat(c[1]),
+parseFloat(c[2])
+];
+
+
+return null;
+
+}
+
+
+function check(){
+
+let text=document.getElementById("url").value;
+
+let result=document.getElementById("result");
+
+let p=getCoords(text);
+
+
+if(!p){
+
+result.innerHTML="⚠️ لم يتم العثور على إحداثيات";
+result.style.color="orange";
+return;
+
+}
+
+
+if(inside(p[0],p[1])){
+
+result.innerHTML=
+"✅ داخل حدود المسؤولية";
+
+result.style.color="green";
+
+}else{
+
+result.innerHTML=
+"❌ خارج حدود المسؤولية";
+
+result.style.color="red";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
